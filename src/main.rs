@@ -1,11 +1,21 @@
+use std::collections::HashMap;
+
+#[derive(Hash, Eq, PartialEq, Clone, Copy)]
+enum Language {
+    English,
+}
+
 struct NATO {
-    mapping: Vec<(&'static str, &'static str)>,
+    mappings: HashMap<Language, Vec<(&'static str, &'static str)>>,
+    language: Language,
 }
 
 impl NATO {
-    fn new() -> Self {
-        Self {
-            mapping: vec![
+    fn new(language: Language) -> Self {
+        let mut mappings = HashMap::new();
+        mappings.insert(
+            Language::English,
+            vec![
                 ("A", "Alpha"),
                 ("B", "Bravo"),
                 ("C", "Charlie"),
@@ -33,14 +43,16 @@ impl NATO {
                 ("Y", "Yankee"),
                 ("Z", "Zulu"),
             ],
-        }
+        );
+        Self { mappings, language }
     }
 
     fn encrypt(&self, plaintext: &str) -> String {
+        let mapping = self.mappings.get(&self.language).unwrap();
         let mut ciphertext = String::new();
         for c in plaintext.chars() {
             let c = c.to_ascii_uppercase();
-            let code = match self.mapping.iter().find(|&&(key, _)| key == &c.to_string()) {
+            let code = match mapping.iter().find(|&&(key, _)| key == &c.to_string()) {
                 Some(&(_, value)) => value.to_string(),
                 None => c.to_string(),
             };
@@ -50,10 +62,11 @@ impl NATO {
     }
 
     fn decrypt(&self, ciphertext: &str) -> String {
+        let mapping = self.mappings.get(&self.language).unwrap();
         let mut plaintext = String::new();
         let words: Vec<&str> = ciphertext.split(' ').collect();
         for (i, word) in words.iter().enumerate() {
-            let letter = match self.mapping.iter().find(|&&(_, value)| value == *word) {
+            let letter = match mapping.iter().find(|&&(_, value)| value == *word) {
                 Some(&(key, _)) => key,
                 None => word,
             };
@@ -67,7 +80,7 @@ impl NATO {
 }
 
 fn main() {
-    let nato = NATO::new();
+    let nato = NATO::new(Language::English);
     let plaintext = "Hello, world!";
     let ciphertext = nato.encrypt(plaintext);
     println!("{}", ciphertext);
