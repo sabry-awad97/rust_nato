@@ -1,8 +1,8 @@
-struct NATOEncryptor {
+struct NATO {
     mapping: Vec<(&'static str, &'static str)>,
 }
 
-impl NATOEncryptor {
+impl NATO {
     fn new() -> Self {
         Self {
             mapping: vec![
@@ -48,11 +48,27 @@ impl NATOEncryptor {
         }
         ciphertext.trim().to_string()
     }
+
+    fn decrypt(&self, ciphertext: &str) -> String {
+        let mut plaintext = String::new();
+        let words: Vec<&str> = ciphertext.split_whitespace().collect();
+        for word in words {
+            let letter = match self.mapping.iter().find(|&&(_, value)| value == word) {
+                Some(&(key, _)) => key,
+                None => word,
+            };
+            plaintext.push_str(&letter);
+        }
+        plaintext
+    }
 }
 
 fn main() {
-    let encryptor = NATOEncryptor::new();
+    let nato = NATO::new();
     let plaintext = "Hello, world!";
-    let ciphertext = encryptor.encrypt(plaintext);
+    let ciphertext = nato.encrypt(plaintext);
     println!("{}", ciphertext);
+
+    let plaintext = nato.decrypt(&ciphertext);
+    println!("{}", plaintext);
 }
