@@ -51,13 +51,16 @@ impl NATO {
 
     fn decrypt(&self, ciphertext: &str) -> String {
         let mut plaintext = String::new();
-        let words: Vec<&str> = ciphertext.split_whitespace().collect();
-        for word in words {
-            let letter = match self.mapping.iter().find(|&&(_, value)| value == word) {
+        let words: Vec<&str> = ciphertext.split(' ').collect();
+        for (i, word) in words.iter().enumerate() {
+            let letter = match self.mapping.iter().find(|&&(_, value)| value == *word) {
                 Some(&(key, _)) => key,
                 None => word,
             };
             plaintext.push_str(&letter);
+            if i < words.len() - 1 {
+                plaintext.push(' ');
+            }
         }
         plaintext
     }
